@@ -13,6 +13,12 @@ The default OpenSpec `spec-driven` workflow is left untouched. This package inst
 The target project must already contain `openspec/config.yaml` or `openspec/config.yml`.
 
 ```bash
+npx github:chujiulaile/openspec-full-check install --project . --tools codex,claude
+```
+
+After the package is published to npm, the shorter equivalent will be:
+
+```bash
 npx openspec-full-check install --project . --tools codex,claude
 ```
 

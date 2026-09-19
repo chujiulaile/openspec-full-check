@@ -29,5 +29,13 @@
     "claude-code",
     "agent-skills"
   ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chujiulaile/openspec-full-check.git"
+  },
+  "homepage": "https://github.com/chujiulaile/openspec-full-check#readme",
+  "bugs": {
+    "url": "https://github.com/chujiulaile/openspec-full-check/issues"
+  },
   "license": "MIT"
 }
