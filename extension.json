@@ -1,0 +1,27 @@
+{
+  "name": "openspec-full-check",
+  "displayName": "OpenSpec Full Check Workflow",
+  "version": "0.1.0",
+  "description": "PRD review, planning score, risk-based code review, and post-apply TDD gates for complex OpenSpec changes.",
+  "schema": {
+    "name": "full-check",
+    "source": "bundle/schema/full-check"
+  },
+  "stages": [
+    "prd-review",
+    "propose",
+    "score",
+    "apply",
+    "tdd",
+    "archive"
+  ],
+  "supportedTools": [
+    "codex",
+    "claude",
+    "shared-agents"
+  ],
+  "requirements": {
+    "openspec": ">=1.1.0",
+    "node": ">=20"
+  }
+}

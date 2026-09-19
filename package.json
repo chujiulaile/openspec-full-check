@@ -1,0 +1,33 @@
+{
+  "name": "openspec-full-check",
+  "version": "0.1.0",
+  "description": "Install a full-check OpenSpec workflow with PRD review, planning score, risk-based code review, and post-apply TDD gates.",
+  "type": "module",
+  "bin": {
+    "openspec-full-check": "bin/openspec-full-check.mjs"
+  },
+  "files": [
+    "bin",
+    "src",
+    "bundle",
+    "extension.json",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check bin/openspec-full-check.mjs && node --check src/installer.mjs && node --test",
+    "pack:dry-run": "npm pack --dry-run"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "openspec",
+    "spec-driven-development",
+    "codex",
+    "claude-code",
+    "agent-skills"
+  ],
+  "license": "MIT"
+}

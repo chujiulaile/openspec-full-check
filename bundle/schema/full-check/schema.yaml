@@ -1,0 +1,72 @@
+name: full-check
+version: 1
+description: 全流程质量门禁 - PRD 评审 → 规划 → 独立评分 → 实现 → TDD（操作阶段）
+artifacts:
+  - id: prd-review
+    generates: prd-review.md
+    description: 提案前的 PRD 严谨性评审与结构化需求基线
+    template: prd-review.md
+    instruction: |
+      仅通过显式的 openspec-full-prd-review 工作流创建。评审目标、范围、角色权限、
+      主流程、状态变化、异常边界、数据口径、依赖、兼容性、非功能约束和验收标准。
+      用 R1..Rn 建立来源追踪。未解决的实质性歧义使用 needs-clarification；材料不足
+      使用 insufficient-material；只有不存在会改变行为或验收的未决问题时才使用 ready。
+    requires: []
+
+  - id: proposal
+    generates: proposal.md
+    description: 说明变更缘由、范围、能力和影响
+    template: proposal.md
+    instruction: |
+      基于 prd-review 创建简洁 proposal，说明 Why、What Changes、Capabilities 和 Impact。
+      若用户在 prd-review 非 ready 时明确继续，必须在 Accepted PRD Risks 中逐项记录。
+      有行为变化时声明新增或修改的 capability；纯重构、工具链或文档可在变更元数据
+      使用 skip_specs: true，不得为通过校验而臆造 spec。
+    requires: [prd-review]
+
+  - id: specs
+    generates: "specs/**/*.md"
+    description: 可测试的外部行为契约
+    template: spec.md
+    instruction: |
+      为 proposal 声明的每个 capability 创建 delta spec。使用 SHALL/MUST 描述外部行为，
+      每条 Requirement 至少包含一个严格使用 #### Scenario 的 WHEN/THEN 场景。
+      新能力使用 ADDED；修改既有行为时复制完整需求到 MODIFIED；移除时给出 Reason 和 Migration。
+    requires: [proposal]
+
+  - id: design
+    generates: design.md
+    description: 技术方案、决策、风险和迁移设计
+    template: design.md
+    instruction: |
+      说明如何实现，而不是重复 proposal/spec。记录 Context、Goals/Non-Goals、关键 Decisions、
+      备选方案、Risks/Trade-offs 和需要时的 Migration Plan。会改变行为、方案或任务拆分的
+      问题必须现在解决，不能留在 Open Questions。
+    requires: [proposal]
+
+  - id: tasks
+    generates: tasks.md
+    description: 带验证方式的可执行任务清单
+    template: tasks.md
+    instruction: |
+      按依赖顺序拆解任务。每项严格使用 `- [ ] X.Y 描述`，足够小且包含可观察的完成验证方式。
+      共享 DTO/API、配置、迁移、生成物或同一测试文件的任务不得假设可并行。
+    requires: [specs, design]
+
+  - id: score
+    generates: score.md
+    description: 完整规划产物的独立、只读、可追踪质量评分
+    template: score.md
+    instruction: |
+      仅通过显式 openspec-full-score 工作流创建。独立核对 prd-review、proposal、specs、
+      design、tasks 和必要代码事实。总分达到 85 且没有 blocker、材料缺口、关键未决事项、
+      不可追踪需求或实现/验收冲突时，result 才能为 pass。
+    requires: [tasks]
+
+apply:
+  requires: [score]
+  tracks: tasks.md
+  instruction: |
+    开始实现前验证 score.md 为 result: pass 且 score >= 85。按任务依赖和文件所有权组织批次；
+    仅真正独立的任务并行。高风险、跨模块、共享契约、并行批次或证据不足时使用独立只读
+    代码 reviewer。全部任务完成后停止并提示显式运行 openspec-full-tdd，不直接归档。
