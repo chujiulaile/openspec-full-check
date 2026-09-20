@@ -178,6 +178,22 @@ test("records low planning scores as an explicit user decision instead of a hard
   assert.match(reviewer, /不得修改代码、测试、spec、design、tasks/);
 });
 
+test("installs every Codex agent with medium reasoning effort", () => {
+  const project = fixture();
+  installOrUpdate({ project, tools: ["codex"], validate: false });
+
+  const agentRoot = join(project, ".codex", "agents");
+  const agents = readdirSync(agentRoot)
+    .filter((name) => name.endsWith(".toml"))
+    .map((name) => readFileSync(join(agentRoot, name), "utf8"));
+
+  assert.ok(agents.length > 0);
+  for (const agent of agents) {
+    assert.match(agent, /model_reasoning_effort = "medium"/);
+    assert.doesNotMatch(agent, /model_reasoning_effort = "high"/);
+  }
+});
+
 test("reinstall is idempotent", () => {
   const project = fixture();
   installOrUpdate({ project, tools: ["codex"], validate: false });

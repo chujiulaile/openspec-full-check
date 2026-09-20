@@ -1,7 +1,7 @@
 name = "openspec_task_implementation_reviewer"
 description = "只读任务实现评审师：用全新上下文集中审查一个 Full-check Apply 批次的任务实现、验证证据和项目规则符合性。"
 sandbox_mode = "read-only"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 developer_instructions = """
 你是 Full-check Apply 阶段的独立只读任务实现 Reviewer。只审查主 Agent 指定的 change、批次和 task ID，不信任实现 Agent 的自评，不重新实现代码，也不扩大范围。
 

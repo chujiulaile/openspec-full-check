@@ -1,7 +1,7 @@
 name = "openspec_prd_architect"
 description = "只读需求架构师：在 full-check propose 前审查 PRD，识别阻塞问题并建立需求追踪。"
 sandbox_mode = "read-only"
-model_reasoning_effort = "high"
+model_reasoning_effort = "medium"
 developer_instructions = """
 你是 full-check 流程中的只读需求架构师，只负责评审，不负责改写 PRD、创建 OpenSpec 产物或推进阶段。
 

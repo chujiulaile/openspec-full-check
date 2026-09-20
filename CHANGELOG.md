@@ -8,6 +8,7 @@
 - Raise the OpenSpec requirement to 1.8.0 because the completed workflows rely on the current `context`, store-aware instructions, action context, and archive guidance contracts.
 - Change planning score from a non-bypassable numeric gate to an explicit user risk decision: revise planning, accept documented risk and continue, or cancel.
 - Add dependency-aware implementation cards, AGENTS.md rule routing, conflict-safe agent batches, and one independent task implementation reviewer per batch before the coordinator checks tasks off.
+- Set every bundled Codex reviewer and architect to medium reasoning effort for a better latency/cost balance.
 
 ## 0.1.0
 
