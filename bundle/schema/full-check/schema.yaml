@@ -62,7 +62,8 @@ artifacts:
       prd-review、proposal、specs、design、tasks、相关主 specs 和必要代码事实。建立来源到验证
       方式的 R1..Rn 双向追踪，确认产品规则足以实现和验收。总分达到 85 且没有 blocker、
       材料缺口、关键未决事项、来源冲突、不可追踪需求、未经授权的新增规则或实现/验收冲突时，
-      result 才能为 pass。
+      result 才能为 pass。非 pass 或低于 85 不自动禁止 apply，但 apply 必须向用户展示风险并取得
+      明确的“修订规划”或“接受风险继续”决定。
     requires: [tasks]
 
 apply:
@@ -70,7 +71,7 @@ apply:
   tracks: tasks.md
   instruction: |
     保留标准 OpenSpec apply 的 root/store、change 选择、权威路径、contextFiles、动态状态、进度、
-    暂停和完成语义。开始实现前验证 score.md 为 result: pass 且 score >= 85。按任务依赖和
-    文件所有权组织批次；仅真正独立的任务并行。高风险、跨模块、共享契约、并行批次或证据
-    不足时使用独立只读代码 reviewer。全部任务完成后停止并提示显式运行 openspec-full-tdd，
-    不直接归档。
+    暂停和完成语义。开始实现前必须读取 score.md；非 pass 或低于 85 时展示全部阻塞与风险，
+    由用户选择先修订规划或接受风险继续，并记录决定。按依赖、文件所有权和共享资源组织批次；
+    仅真正独立的任务并行。每批使用一个全新上下文的独立只读任务 Reviewer，通过后由主 Agent
+    统一勾选 tasks。全部任务完成后停止并提示显式运行 openspec-full-tdd，不直接归档。

@@ -16,9 +16,9 @@ compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 4. 运行 `openspec status --change "<name>" --json`，要求 `schemaName: full-check`，保存 `planningHome`、`changeRoot`、`artifactPaths`、`actionContext`。
 5. 运行 `openspec instructions apply --change "<name>" --json` 获取当前 `contextFiles`、任务状态、context 和 operationGuidance。读取全部 contextFiles；context 是必须考虑的约束，guidance 仅建议，二者不得覆盖 CLI 状态、用户授权或 spec，也不得复制进报告。
 
-## 2. 前置硬门禁
+## 2. 前置条件
 
-从 artifactPaths 定位 score 和 tasks，不猜路径。要求 score `result: pass` 且 `score >= 85`，apply state 为 `all_done`，全部任务 checkbox 完成；否则停止并返回 Apply。读取实际 diff、相关测试和构建配置；测试命令必须来自仓库事实，不能凭通用习惯编造。
+从 artifactPaths 定位 score 和 tasks，不猜路径。score 必须存在且可解析；若不是 `result: pass` 且 `score >= 85`，必须已有 `Apply Decision` 区域的 `decision: accepted-risk`。旧报告没有决定记录时，展示原评分风险并让用户选择修订规划、接受风险继续或取消；接受后补记决定，但不得改写分数/result。apply state 必须为 `all_done`，全部任务 checkbox 必须完成，否则停止并返回 Apply。读取实际 diff、相关测试和构建配置；测试命令必须来自仓库事实，不能凭通用习惯编造。
 
 ## 3. 场景驱动测试循环
 

@@ -6,6 +6,8 @@
 - Expand the score workflow and report template so product decisions, project constraints, code facts, tasks, and verification evidence remain traceable.
 - Rebase all six Full-check skills on OpenSpec's root/store and authoritative-path contracts; make Propose, Apply, and Archive behavioral supersets of the standard workflows while retaining PRD, Score, review, TDD, and verified delta-sync gates.
 - Raise the OpenSpec requirement to 1.8.0 because the completed workflows rely on the current `context`, store-aware instructions, action context, and archive guidance contracts.
+- Change planning score from a non-bypassable numeric gate to an explicit user risk decision: revise planning, accept documented risk and continue, or cancel.
+- Add dependency-aware implementation cards, AGENTS.md rule routing, conflict-safe agent batches, and one independent task implementation reviewer per batch before the coordinator checks tasks off.
 
 ## 0.1.0
 

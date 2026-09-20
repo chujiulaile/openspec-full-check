@@ -48,3 +48,12 @@ reviewer: independent
 ## 复评条件
 
 ## 主 Agent 下一步
+
+## Apply Decision
+
+- decision: pending
+- decided_at: ""
+- accepted_risks: []
+- implementation_watch_items: []
+
+<!-- decision: pending | accepted-risk | revise-planning | cancelled。由 Apply 阶段更新；不得改写评审分数或 result。 -->

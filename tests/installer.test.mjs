@@ -54,6 +54,16 @@ test("installs Codex and Claude adapters without changing the default schema", (
     existsSync(join(project, ".codex", "agents", "openspec-code-reviewer.toml")),
   );
   assert.ok(
+    existsSync(
+      join(project, ".codex", "agents", "openspec-task-implementation-reviewer.toml"),
+    ),
+  );
+  assert.ok(
+    existsSync(
+      join(project, ".claude", "agents", "openspec-task-implementation-reviewer.md"),
+    ),
+  );
+  assert.ok(
     existsSync(join(project, ".claude", "commands", "opsx-full", "score.md")),
   );
   assert.deepEqual(manifest(project).tools, ["claude", "codex"]);
@@ -126,11 +136,46 @@ test("installs full-check skills with the standard OpenSpec runtime contract", (
   assert.match(skills["openspec-full-propose"], /artifact 依赖图/);
   assert.match(skills["openspec-full-apply"], /missingArtifacts/);
   assert.match(skills["openspec-full-apply"], /state: all_done/);
+  assert.match(skills["openspec-full-apply"], /Score 风险确认/);
+  assert.match(skills["openspec-full-apply"], /实现卡片/);
+  assert.match(skills["openspec-full-apply"], /文件所有权/);
+  assert.match(skills["openspec-full-apply"], /openspec_task_implementation_reviewer/);
+  assert.match(skills["openspec-full-apply"], /openspec-task-implementation-reviewer/);
   assert.match(skills["openspec-full-tdd"], /contextFiles/);
   assert.match(skills["openspec-full-archive"], /existingOutputPaths/);
   assert.match(skills["openspec-full-archive"], /前台同步执行/);
   assert.match(skills["openspec-full-archive"], /changeRoot/);
   assert.equal(extension.requirements.openspec, ">=1.8.0");
+});
+
+test("records low planning scores as an explicit user decision instead of a hard apply gate", () => {
+  const project = fixture();
+  installOrUpdate({ project, tools: ["codex"], validate: false });
+
+  const applySkill = readFileSync(
+    join(project, ".agents", "skills", "openspec-full-apply", "SKILL.md"),
+    "utf8",
+  );
+  const scoreTemplate = readFileSync(
+    join(project, "openspec", "schemas", "full-check", "templates", "score.md"),
+    "utf8",
+  );
+  const reviewer = readFileSync(
+    join(
+      project,
+      ".codex",
+      "agents",
+      "openspec-task-implementation-reviewer.toml",
+    ),
+    "utf8",
+  );
+
+  assert.match(applySkill, /接受列出的规划风险并继续实现/);
+  assert.doesNotMatch(applySkill, /不能由人工确认绕过/);
+  assert.match(scoreTemplate, /decision: pending/);
+  assert.match(scoreTemplate, /accepted_risks: \[\]/);
+  assert.match(reviewer, /pass、must-fix 或 blocked/);
+  assert.match(reviewer, /不得修改代码、测试、spec、design、tasks/);
 });
 
 test("reinstall is idempotent", () => {
