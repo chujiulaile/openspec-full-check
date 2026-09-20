@@ -72,6 +72,7 @@ apply:
   instruction: |
     保留标准 OpenSpec apply 的 root/store、change 选择、权威路径、contextFiles、动态状态、进度、
     暂停和完成语义。开始实现前必须读取 score.md；非 pass 或低于 85 时展示全部阻塞与风险，
-    由用户选择先修订规划或接受风险继续，并记录决定。按依赖、文件所有权和共享资源组织批次；
+    由用户选择先修订规划或接受风险继续，并把决定单独记录到 apply-decision.md，不修改 score.md。
+    按依赖、文件所有权和共享资源组织批次；
     仅真正独立的任务并行。每批使用一个全新上下文的独立只读任务 Reviewer，通过后由主 Agent
     统一勾选 tasks。全部任务完成后停止并提示显式运行 openspec-full-tdd，不直接归档。

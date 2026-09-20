@@ -1,7 +1,8 @@
 ---
 name: openspec-full-tdd
 description: 在 full-check apply 完成后，使用 OpenSpec 权威上下文建立 spec 场景测试映射、补强测试、最小修复并生成 tdd-report.md。
-compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
+metadata:
+  compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 ---
 
 # Full-check TDD Quality Gate
@@ -18,7 +19,7 @@ compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 
 ## 2. 前置条件
 
-从 artifactPaths 定位 score 和 tasks，不猜路径。score 必须存在且可解析；若不是 `result: pass` 且 `score >= 85`，必须已有 `Apply Decision` 区域的 `decision: accepted-risk`。旧报告没有决定记录时，展示原评分风险并让用户选择修订规划、接受风险继续或取消；接受后补记决定，但不得改写分数/result。apply state 必须为 `all_done`，全部任务 checkbox 必须完成，否则停止并返回 Apply。读取实际 diff、相关测试和构建配置；测试命令必须来自仓库事实，不能凭通用习惯编造。
+从 artifactPaths 定位 score 和 tasks，不猜路径。score 必须存在且可解析；若不是 `result: pass` 且 `score >= 85`，则 `<changeRoot>/apply-decision.md` 必须为 `decision: accepted-risk`，且其中记录的 score SHA-256 必须匹配当前 score。决定缺失、无效或评分已变化时停止并要求返回 Apply 重新确认，不得在 TDD 阶段补做追认，也不得修改分数/result。apply state 必须为 `all_done`，全部任务 checkbox 必须完成，否则停止并返回 Apply。读取实际 diff、相关测试和构建配置；测试命令必须来自仓库事实，不能凭通用习惯编造。
 
 ## 3. 场景驱动测试循环
 
@@ -31,7 +32,7 @@ compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 
 ## 4. 报告与完成
 
-将 `tdd-report.md` 写到 CLI 返回的 `changeRoot`，不得猜相对目录。frontmatter 包含 `status: passed|failed|blocked`、`tested_at`、`commands`、`passed`、`failed`；正文包含场景映射、测试与代码改动、每条命令结果、未运行项和理由、剩余风险。
+将 `tdd-report.md` 写到 CLI 返回的 `changeRoot`，使用随扩展安装的 `templates/tdd-report.md` 结构，不得写到当前工作目录。frontmatter 包含 `status: passed|failed|blocked`、`tested_at`、`commands`、`passed`、`failed`；正文包含场景映射、测试与代码改动、每条命令结果、未运行项和理由、剩余风险。
 
 只有关键场景均有证据、相关测试通过且无 blocker 时才可 `status: passed`。写后复读报告并验证命令/计数与本轮输出一致。passed 时提示 `$openspec-full-archive <change>`；failed/blocked 时明确下一步并停止，不自动归档。
 

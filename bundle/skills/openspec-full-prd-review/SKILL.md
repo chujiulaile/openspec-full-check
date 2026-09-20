@@ -1,7 +1,8 @@
 ---
 name: openspec-full-prd-review
 description: 在 full-check propose 前独立评审产品需求，使用 OpenSpec 权威路径生成可追踪的 prd-review.md；默认 spec-driven 不使用。
-compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
+metadata:
+  compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 ---
 
 # Full-check PRD Review

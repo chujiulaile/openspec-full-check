@@ -1,7 +1,8 @@
 ---
 name: openspec-full-archive
 description: 在 Score 风险已决策且 TDD 通过后，按 OpenSpec 标准同步 delta specs、验证并归档 full-check change。
-compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
+metadata:
+  compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 ---
 
 # Full-check Archive
@@ -22,7 +23,7 @@ compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 
 1. status 中所有规划产物必须为 done 或 skipped；任何其他状态均停止。
 2. 从 artifactPaths 定位任务文件；只有内容为 `x` 或 `X` 的 checkbox 算完成，其他标记均视为未完成。存在未完成任务即停止。
-3. score 必须存在且可解析；若不是 `result: pass` 且 `score >= 85`，必须有 `Apply Decision` 区域的 `decision: accepted-risk`。没有决定记录时先让用户选择修订规划、接受风险归档或取消；接受后记录决定，不改写原评分。
+3. score 必须存在且可解析；若不是 `result: pass` 且 `score >= 85`，则 `<changeRoot>/apply-decision.md` 必须为 `decision: accepted-risk`，且其中记录的 score SHA-256 必须匹配当前 score。决定缺失、无效或评分已变化时停止并要求返回 Apply 重新确认；Archive 不得补做追认，也不得修改原评分。
 4. 从 `changeRoot` 定位 `tdd-report.md`，要求 frontmatter `status: passed`，并复核包含实际命令、结果、关键场景证据和未运行项说明。主观“测试通过”不算。
 
 上述门禁不能通过“仍然归档”确认绕过。

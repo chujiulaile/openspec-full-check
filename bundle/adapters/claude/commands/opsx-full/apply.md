@@ -1,5 +1,5 @@
 ---
-description: 在评分通过后实现 full-check 任务
+description: 在确认规划评分风险后实现 full-check 任务
 argument-hint: <change-name>
 ---
 

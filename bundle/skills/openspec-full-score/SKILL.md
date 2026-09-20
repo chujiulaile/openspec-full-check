@@ -1,7 +1,8 @@
 ---
 name: openspec-full-score
 description: 独立评审 full-check 的需求来源与全部规划产物，确认可实现、可验收、可追踪，并使用 OpenSpec 权威路径生成 score.md。
-compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
+metadata:
+  compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 ---
 
 # Full-check Planning Score

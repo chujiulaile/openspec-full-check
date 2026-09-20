@@ -49,11 +49,4 @@ reviewer: independent
 
 ## 主 Agent 下一步
 
-## Apply Decision
-
-- decision: pending
-- decided_at: ""
-- accepted_risks: []
-- implementation_watch_items: []
-
-<!-- decision: pending | accepted-risk | revise-planning | cancelled。由 Apply 阶段更新；不得改写评审分数或 result。 -->
+<!-- score.md 是独立评审证据，Apply 阶段不得修改。低分或非 pass 的用户决定单独写入 apply-decision.md。 -->

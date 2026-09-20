@@ -6,10 +6,13 @@ import {
   readFileSync,
   readdirSync,
   rmSync,
+  symlinkSync,
   writeFileSync,
 } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 import test from "node:test";
 
 import { doctor, installOrUpdate, uninstall } from "../src/installer.mjs";
@@ -33,6 +36,28 @@ function manifest(project) {
     ),
   );
 }
+
+function runOpenSpec(command, args, cwd) {
+  if (process.platform === "win32") {
+    return spawnSync(process.env.ComSpec || "cmd.exe", ["/d", "/s", "/c", `${command}.cmd`, ...args], {
+      cwd,
+      encoding: "utf8",
+      shell: false,
+    });
+  }
+  return spawnSync(command, args, { cwd, encoding: "utf8", shell: false });
+}
+
+test("prints package help and version from top-level flags", () => {
+  const executable = fileURLToPath(new URL("../bin/openspec-full-check.mjs", import.meta.url));
+  const version = spawnSync(process.execPath, [executable, "--version"], { encoding: "utf8" });
+  const help = spawnSync(process.execPath, [executable, "--help"], { encoding: "utf8" });
+
+  assert.equal(version.status, 0, version.stderr);
+  assert.equal(version.stdout.trim(), extension.version);
+  assert.equal(help.status, 0, help.stderr);
+  assert.match(help.stdout, new RegExp(`OpenSpec Full Check ${extension.version.replaceAll(".", "\\.")}`));
+});
 
 test("installs Codex and Claude adapters without changing the default schema", () => {
   const project = fixture();
@@ -156,8 +181,8 @@ test("records low planning scores as an explicit user decision instead of a hard
     join(project, ".agents", "skills", "openspec-full-apply", "SKILL.md"),
     "utf8",
   );
-  const scoreTemplate = readFileSync(
-    join(project, "openspec", "schemas", "full-check", "templates", "score.md"),
+  const decisionTemplate = readFileSync(
+    join(project, "openspec", "schemas", "full-check", "templates", "apply-decision.md"),
     "utf8",
   );
   const reviewer = readFileSync(
@@ -172,10 +197,43 @@ test("records low planning scores as an explicit user decision instead of a hard
 
   assert.match(applySkill, /接受列出的规划风险并继续实现/);
   assert.doesNotMatch(applySkill, /不能由人工确认绕过/);
-  assert.match(scoreTemplate, /decision: pending/);
-  assert.match(scoreTemplate, /accepted_risks: \[\]/);
+  assert.match(applySkill, /不得修改独立 Reviewer 生成的 score\.md/);
+  assert.match(applySkill, /score 文件 SHA-256/);
+  assert.match(decisionTemplate, /decision: pending/);
+  assert.match(decisionTemplate, /score_sha256:/);
+  assert.match(decisionTemplate, /accepted_risks: \[\]/);
   assert.match(reviewer, /pass、must-fix 或 blocked/);
   assert.match(reviewer, /不得修改代码、测试、spec、design、tasks/);
+});
+
+test("keeps every Claude reviewer technically read-only", () => {
+  const project = fixture();
+  installOrUpdate({ project, tools: ["claude"], validate: false });
+
+  const agentRoot = join(project, ".claude", "agents");
+  const agents = readdirSync(agentRoot)
+    .filter((name) => name.endsWith(".md"))
+    .map((name) => readFileSync(join(agentRoot, name), "utf8"));
+
+  assert.ok(agents.length > 0);
+  for (const agent of agents) {
+    assert.match(agent, /^tools: Read, Grep, Glob$/m);
+    assert.match(agent, /^permissionMode: plan$/m);
+    assert.doesNotMatch(agent, /^tools:.*\bBash\b/m);
+  }
+});
+
+test("documents a safe independent-review fallback for shared skills", () => {
+  const project = fixture();
+  installOrUpdate({ project, tools: ["shared-agents"], validate: false });
+  const applySkill = readFileSync(
+    join(project, ".agents", "skills", "openspec-full-apply", "SKILL.md"),
+    "utf8",
+  );
+
+  assert.match(applySkill, /命名 Reviewer 未安装/);
+  assert.match(applySkill, /仅有读取\/搜索权限的通用子 Agent/);
+  assert.match(applySkill, /不得静默把主 Agent 自评伪装成独立评审/);
 });
 
 test("installs every Codex agent with medium reasoning effort", () => {
@@ -275,4 +333,62 @@ test("installed schema passes the available OpenSpec CLI validator", () => {
   const result = installOrUpdate({ project, tools: ["codex"], validate: true });
   assert.ok(result.validation, "expected openspec or openspec-cn to be available in this environment");
   assert.match(result.validation.command, /^openspec(?:-cn)?$/);
+  assert.match(result.validation.version, /^\d+\.\d+\.\d+$/);
+});
+
+test("fails before writing when no compatible OpenSpec CLI is available", () => {
+  const project = fixture();
+  const executable = new URL("../bin/openspec-full-check.mjs", import.meta.url);
+  const result = spawnSync(
+    process.execPath,
+    [fileURLToPath(executable), "install", "--project", project, "--tools", "codex"],
+    {
+      encoding: "utf8",
+      env: { ...process.env, PATH: "" },
+    },
+  );
+
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /OpenSpec or OpenSpec-CN 1\.8\.0 or later is required/);
+  assert.equal(existsSync(join(project, ".openspec-extensions")), false);
+});
+
+test("runs a real full-check change through OpenSpec status resolution", () => {
+  const project = fixture();
+  const installed = installOrUpdate({ project, tools: ["codex"], validate: true });
+  const command = installed.validation.command;
+  const created = runOpenSpec(
+    command,
+    ["new", "change", "workflow-smoke", "--schema", "full-check", "--json"],
+    project,
+  );
+  assert.equal(created.status, 0, created.stderr || created.stdout);
+
+  const status = runOpenSpec(
+    command,
+    ["status", "--change", "workflow-smoke", "--json"],
+    project,
+  );
+  assert.equal(status.status, 0, status.stderr || status.stdout);
+  const state = JSON.parse(status.stdout);
+  assert.equal(state.schemaName, "full-check");
+  assert.deepEqual(state.applyRequires, ["score"]);
+  assert.equal(state.artifacts[0].id, "prd-review");
+  assert.equal(state.artifacts[0].status, "ready");
+  assert.equal(state.artifacts.at(-1).id, "score");
+});
+
+test("refuses install targets that traverse a linked project directory", (t) => {
+  const project = fixture();
+  const outside = mkdtempSync(join(tmpdir(), "openspec-full-check-outside-"));
+  try {
+    symlinkSync(outside, join(project, ".agents"), "junction");
+  } catch (error) {
+    t.skip(`symbolic links unavailable: ${error.message}`);
+    return;
+  }
+  assert.throws(
+    () => installOrUpdate({ project, tools: ["shared-agents"], validate: false }),
+    /Refusing linked path inside project/,
+  );
 });

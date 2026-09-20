@@ -1,7 +1,8 @@
 ---
 name: openspec-full-apply
 description: 在用户确认规划评分风险后实现 full-check change；保留 OpenSpec apply 行为，并增加规则路由、依赖批次、文件所有权、独立任务审查和 TDD 衔接。
-compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
+metadata:
+  compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 ---
 
 # Full-check Apply
@@ -24,7 +25,7 @@ compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 2. 接受列出的规划风险并继续实现；
 3. 取消。
 
-只有用户明确选择继续才能进入实现，不得替用户接受风险，也不得把低分改写成 pass。将选择、时间、被接受的风险和仍需实现阶段观察的事项写入 score.md 的 `Apply Decision` 区域，使用 `decision: accepted-risk|revise-planning|cancelled`、`decided_at`、`accepted_risks`、`implementation_watch_items`；旧报告没有该区域时追加。选择修订或取消时停止。
+只有用户明确选择继续才能进入实现，不得替用户接受风险，也不得把低分改写成 pass。把决定写入 `<changeRoot>/apply-decision.md`，不得修改独立 Reviewer 生成的 score.md。决定文件使用随扩展安装的 `templates/apply-decision.md` 结构，记录 `decision: accepted-risk|revise-planning|cancelled`、`decided_at`、原始 `score_result`/`score`、score 文件 SHA-256、`accepted_risks` 和 `implementation_watch_items`。已有决定只有在它引用的 score SHA-256 与当前文件一致时才有效；评分变化后必须重新确认。选择修订或取消时停止。
 
 ## 3. 获取标准 Apply 输入
 
@@ -58,7 +59,7 @@ compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 
 1. 实现 Agent 做满足 spec/design/task 的最小聚焦修改并执行定向验证，返回实际文件、命令、结果和未决问题；不以自评作为通过证据。
 2. 主 Agent 等待当前批次全部返回，核对工作区 diff、文件所有权和冲突；有冲突先暂停协调。
-3. 每个批次只启动一个全新上下文、只读的任务实现 Reviewer：Codex 使用 `openspec_task_implementation_reviewer`，Claude 使用 `openspec-task-implementation-reviewer`；集中审查该批次全部任务。Reviewer 只读取相关 task/spec/design、实际 diff、目标文件、验证证据和触发规则，独立检查行为、异常、边界、调用链、副作用、任务完成度和规则符合性；不修改代码或 tasks，只审一轮。
+3. 每个批次只启动一个全新上下文、只读的任务实现 Reviewer：Codex 优先使用 `openspec_task_implementation_reviewer`，Claude 优先使用 `openspec-task-implementation-reviewer`；集中审查该批次全部任务。若命名 Reviewer 未安装，但宿主支持新上下文子 Agent，则创建一个仅有读取/搜索权限的通用子 Agent，并把同一 Reviewer 契约、审查范围和输出格式传入；不得赋予写入权限。若宿主完全不支持独立 Agent，暂停并说明当前只能执行非独立复核，由用户选择安装 Codex/Claude adapter 或明确接受降级；不得静默把主 Agent 自评伪装成独立评审。Reviewer 只读取相关 task/spec/design、实际 diff、目标文件、验证证据和触发规则，独立检查行为、异常、边界、调用链、副作用、任务完成度和规则符合性；不修改代码或 tasks，只审一轮。
 4. Reviewer 返回 pass、must-fix 或 blocked。建议项不阻塞；must-fix/blocked 不得勾选。主 Agent 可修复明确问题；只有 diff 已变化且问题已处理时允许一次针对性复评，禁止无限修复—复评循环。不依赖该任务的后续批次可继续，但最终集成前必须清零所有 must-fix/blocked。
 5. 只有行为完整、定向验证有本轮证据、规则复核完成、Reviewer 通过且主 Agent 合并核对后，才由主 Agent 在权威任务文件中把 `- [ ]` 改为 `- [x]`。实现 Agent 和 Reviewer 均不得勾选。勾选后复读并刷新 apply instructions/进度。
 

@@ -7,7 +7,6 @@ import {
   readdirSync,
   rmdirSync,
   rmSync,
-  statSync,
   writeFileSync,
 } from "node:fs";
 import { dirname, join, relative, resolve, sep } from "node:path";
@@ -19,6 +18,7 @@ const BUNDLE_ROOT = join(PACKAGE_ROOT, "bundle");
 const PACKAGE_JSON = JSON.parse(readFileSync(join(PACKAGE_ROOT, "package.json"), "utf8"));
 const MANIFEST_RELATIVE = ".openspec-extensions/full-check/manifest.json";
 const SUPPORTED_TOOLS = new Set(["codex", "claude", "shared-agents"]);
+const MINIMUM_OPENSPEC_VERSION = [1, 8, 0];
 
 function slash(path) {
   return path.split(sep).join("/");
@@ -54,10 +54,18 @@ function assertProject(project) {
 }
 
 function safeTarget(project, relativePath) {
-  const target = resolve(project, relativePath);
-  const prefix = `${resolve(project)}${sep}`;
+  const projectRoot = resolve(project);
+  const target = resolve(projectRoot, relativePath);
+  const prefix = `${projectRoot}${sep}`;
   if (!target.startsWith(prefix)) {
     throw new Error(`Refusing path outside project: ${relativePath}`);
+  }
+  let current = target;
+  while (current.startsWith(prefix)) {
+    if (existsSync(current) && lstatSync(current).isSymbolicLink()) {
+      throw new Error(`Refusing linked path inside project: ${relativePath}`);
+    }
+    current = dirname(current);
   }
   return target;
 }
@@ -151,7 +159,19 @@ function pruneEmptyParents(project, filePath) {
   }
 }
 
-function validateSchema(project) {
+function parseVersion(output) {
+  const match = String(output).match(/(?:^|\D)(\d+)\.(\d+)\.(\d+)(?:\D|$)/);
+  return match ? match.slice(1, 4).map(Number) : null;
+}
+
+function compareVersion(left, right) {
+  for (let index = 0; index < 3; index += 1) {
+    if (left[index] !== right[index]) return left[index] - right[index];
+  }
+  return 0;
+}
+
+function resolveOpenSpecCli(project) {
   const candidates = ["openspec-cn", "openspec"];
   const run = (command, args) => {
     if (process.platform === "win32") {
@@ -163,17 +183,35 @@ function validateSchema(project) {
     }
     return spawnSync(command, args, { cwd: project, encoding: "utf8", shell: false });
   };
+  const rejected = [];
   for (const command of candidates) {
     const probe = run(command, ["--version"]);
     if (probe.status !== 0) continue;
-    const result = run(command, ["schema", "validate", "full-check"]);
-    if (result.status !== 0) {
-      const details = (result.stderr || result.stdout || "unknown validation error").trim();
-      throw new Error(`${command} rejected the installed schema: ${details}`);
+    const rawVersion = `${probe.stdout || ""} ${probe.stderr || ""}`.trim();
+    const version = parseVersion(rawVersion);
+    if (!version) {
+      rejected.push(`${command}: unrecognized version '${rawVersion}'`);
+      continue;
     }
-    return { command, output: result.stdout.trim() };
+    if (compareVersion(version, MINIMUM_OPENSPEC_VERSION) < 0) {
+      rejected.push(`${command}: ${version.join(".")} is below 1.8.0`);
+      continue;
+    }
+    return { command, version: version.join("."), run };
   }
-  return null;
+  const details = rejected.length ? ` Found incompatible CLI(s): ${rejected.join("; ")}.` : "";
+  throw new Error(
+    `OpenSpec or OpenSpec-CN 1.8.0 or later is required.${details}`,
+  );
+}
+
+function validateSchema(project, cli = resolveOpenSpecCli(project)) {
+  const result = cli.run(cli.command, ["schema", "validate", "full-check"]);
+  if (result.status !== 0) {
+    const details = (result.stderr || result.stdout || "unknown validation error").trim();
+    throw new Error(`${cli.command} rejected the installed schema: ${details}`);
+  }
+  return { command: cli.command, version: cli.version, output: result.stdout.trim() };
 }
 
 function planBundle(project, tools, previous, force) {
@@ -257,6 +295,7 @@ export function installOrUpdate({
     dryRun,
   };
   if (dryRun) return summary;
+  const cli = validate ? resolveOpenSpecCli(project) : null;
 
   const backupRoot = slash(
     join(".openspec-extensions", "full-check", "backups", timestamp()),
@@ -299,7 +338,7 @@ export function installOrUpdate({
   mkdirSync(dirname(targetManifest), { recursive: true });
   writeFileSync(targetManifest, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 
-  if (validate) summary.validation = validateSchema(project);
+  if (validate) summary.validation = validateSchema(project, cli);
   return summary;
 }
 
@@ -373,6 +412,8 @@ export function uninstall({ project = process.cwd(), force = false, dryRun = fal
 
 function parseArgs(argv) {
   const options = { command: argv[0] || "help", validate: true };
+  if (options.command === "--help" || options.command === "-h") options.command = "help";
+  if (options.command === "--version" || options.command === "-V") options.command = "version";
   for (let index = 1; index < argv.length; index += 1) {
     const arg = argv[index];
     if (arg === "--project") options.project = argv[++index];
@@ -409,8 +450,8 @@ function usage() {
   return `OpenSpec Full Check ${PACKAGE_JSON.version}
 
 Usage:
-  openspec-full-check install [--project <path>] [--tools codex,claude] [--dry-run] [--force]
-  openspec-full-check update [--project <path>] [--tools codex,claude] [--dry-run] [--force]
+  openspec-full-check install [--project <path>] [--tools codex,claude,shared-agents] [--dry-run] [--force]
+  openspec-full-check update [--project <path>] [--tools codex,claude,shared-agents] [--dry-run] [--force]
   openspec-full-check doctor [--project <path>] [--no-validate]
   openspec-full-check uninstall [--project <path>] [--dry-run] [--force]
 

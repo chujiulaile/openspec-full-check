@@ -42,20 +42,20 @@ prd-review → propose → score → apply → tdd → archive
 ### PowerShell
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.0 `
+npx --yes github:chujiulaile/openspec-full-check#v0.1.1 `
   install --project . --tools codex,claude
 ```
 
 PowerShell 的续行符是反引号 `` ` ``，不是 Bash 的反斜杠 `\`。也可以写成一行：
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.0 install --project . --tools codex,claude
+npx --yes github:chujiulaile/openspec-full-check#v0.1.1 install --project . --tools codex,claude
 ```
 
 ### Bash / Zsh
 
 ```bash
-npx --yes github:chujiulaile/openspec-full-check#v0.1.0 \
+npx --yes github:chujiulaile/openspec-full-check#v0.1.1 \
   install --project . --tools codex,claude
 ```
 
@@ -94,6 +94,8 @@ openspec/FULL_CHECK_WORKFLOW.md
 --tools shared-agents
 ```
 
+`shared-agents` 只安装可移植 Skill，不安装 Codex/Claude 专用 Reviewer。运行 Apply 时会优先创建全新只读子 Agent 执行同一评审契约；宿主不支持独立 Agent 时会暂停并提示安装对应 adapter 或由用户明确接受非独立复核降级，不会静默跳过评审。
+
 即使 `.codex` 或 `.claude` 目录不存在，显式指定对应工具后也会自动创建。若省略 `--tools`，安装器会检测已有 `.codex`、`.claude`；两者都不存在时默认选择 Codex。
 
 ## 建议先预览
@@ -101,7 +103,7 @@ openspec/FULL_CHECK_WORKFLOW.md
 `--dry-run` 只显示计划，不写入文件：
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.0 `
+npx --yes github:chujiulaile/openspec-full-check#v0.1.1 `
   install --project . --tools codex,claude --dry-run
 ```
 
@@ -136,7 +138,7 @@ $openspec-full-archive <change-name>
 | 阶段入口 | 必须满足 | 未通过时 |
 |---|---|---|
 | propose | 已完成 PRD Review；非 ready 时用户已知情接受风险 | 先澄清，或记录接受的风险 |
-| apply | 已完成 `score.md`；低于 85 或非 pass 时用户已明确选择修订规划或接受风险继续 | 展示风险，由用户决定修订或继续 |
+| apply | 已完成 `score.md`；低于 85 或非 pass 时用户已明确选择修订规划或接受风险继续 | 将决定单独写入 `apply-decision.md`，不改写评分报告 |
 | archive | `tdd-report.md` 为 `status: passed` | 修复测试/实现并重新执行 TDD |
 
 PRD Reviewer、规划 Reviewer 和代码 Reviewer 都是只读角色，只返回结论、问题与证据。规划 Reviewer 会核对用户需求与资料、适用 AGENTS.md、各规划产物和必要代码事实，重点判断产品规则是否足以直接实现和验收。主 Agent 负责核验、落盘、修复、运行测试和推进阶段。
@@ -146,9 +148,9 @@ Full-check 不用缩减版流程替代 OpenSpec：Propose、Apply、Archive 保�
 ## 管理命令
 
 ```bash
-npx --yes github:chujiulaile/openspec-full-check#v0.1.0 update --project .
-npx --yes github:chujiulaile/openspec-full-check#v0.1.0 doctor --project .
-npx --yes github:chujiulaile/openspec-full-check#v0.1.0 uninstall --project .
+npx --yes github:chujiulaile/openspec-full-check#v0.1.1 update --project .
+npx --yes github:chujiulaile/openspec-full-check#v0.1.1 doctor --project .
+npx --yes github:chujiulaile/openspec-full-check#v0.1.1 uninstall --project .
 ```
 
 - `update`：根据安装清单安全更新。
@@ -160,10 +162,10 @@ npx --yes github:chujiulaile/openspec-full-check#v0.1.0 uninstall --project .
 
 ## 从 Release 安装包使用
 
-也可以下载 [v0.1.0 Release](https://github.com/chujiulaile/openspec-full-check/releases/tag/v0.1.0) 中的 `.tgz`：
+也可以下载 [v0.1.1 Release](https://github.com/chujiulaile/openspec-full-check/releases/tag/v0.1.1) 中的 `.tgz`：
 
 ```bash
-npx ./openspec-full-check-0.1.0.tgz install --project . --tools codex,claude
+npx ./openspec-full-check-0.1.1.tgz install --project . --tools codex,claude
 ```
 
 ## 本地开发

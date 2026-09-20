@@ -25,4 +25,23 @@ jobs:
       - run: npm ci
       - run: npm install --global @fission-ai/openspec@latest
       - run: npm run check
+      - run: npm run verify:release
       - run: npm run pack:dry-run
+  compatibility:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cli:
+          - "@fission-ai/openspec@1.8.0"
+          - "@fission-ai/openspec@latest"
+          - "@studyzy/openspec-cn@1.8.0"
+          - "@studyzy/openspec-cn@latest"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci
+      - run: npm install --global ${{ matrix.cli }}
+      - run: npm run check

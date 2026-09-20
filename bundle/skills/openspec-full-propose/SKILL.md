@@ -1,7 +1,8 @@
 ---
 name: openspec-full-propose
 description: 为 full-check change 在 PRD 评审后创建 proposal、specs、design 和 tasks；完整保留 OpenSpec 规划行为并增加 PRD 门禁，完成后等待独立评分。
-compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
+metadata:
+  compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 ---
 
 # Full-check Propose
@@ -33,6 +34,8 @@ compatibility: Requires OpenSpec or OpenSpec-CN 1.8.0 or later.
 3. 从磁盘重新读取所有 dependency 路径，即使本轮之前读过。先应用 `context` 和 `rules`，再按需求最小检查相关代码、主 specs、测试、配置和文档，让方案基于项目事实；区分观察事实、用户决定、假设和新增建议。
 4. 若 instruction 委派给特定 skill/command，按其要求同步执行并验证输出；否则严格使用 template 写到 `resolvedOutputPath`。glob 路径按 instruction 解析，禁止硬编码 change 目录或 capability 路径。
 5. context/rules 是生成约束，不得逐字写入产物。写后复读文件并重新运行 status，确认文件存在且下游状态确由 CLI 解锁。
+
+`design` 沿用标准 OpenSpec 的条件语义：只有横切多模块、引入新架构模式或外部依赖、重大数据模型变化、安全/性能/迁移复杂度，或存在必须在编码前解决的技术决策时才创建。若 `instructions design` 判定本次不需要设计，记录跳过理由，不创建空壳 `design.md`。OpenSpec 1.8.x 的 schema 仍可能因此把 `tasks` 显示为 blocked；当且仅当唯一缺失依赖是已经依据 design instruction 合法跳过的 `design` 时，可继续获取 tasks instruction 并创建 tasks。其他 blocked 原因不得绕过。完成总结中必须明确记录这一兼容处理。
 
 产物质量要求：proposal 说明 Why、范围/非目标、能力与影响；每个外部行为变化都有 delta spec，修改既有 capability 时保留其完整相对路径；design 处理跨模块、数据、安全、性能、兼容、迁移和关键决策；tasks 按依赖排序，每项有可观察验证。不得以 `skip_specs` 逃避行为契约，也不得把“探索代码库”留成泛化实现任务。
 
