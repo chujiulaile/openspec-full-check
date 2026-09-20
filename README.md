@@ -111,6 +111,8 @@ npx --yes github:chujiulaile/openspec-full-check#v0.1.1 `
 
 ## 使用流程
 
+团队首次接入、角色分工、完整示例和常见问题见：[团队使用指南](https://github.com/chujiulaile/openspec-full-check/blob/main/docs/TEAM_USAGE_GUIDE.md)。
+
 ### Codex
 
 ```text
