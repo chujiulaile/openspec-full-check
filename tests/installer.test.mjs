@@ -14,6 +14,10 @@ import test from "node:test";
 
 import { doctor, installOrUpdate, uninstall } from "../src/installer.mjs";
 
+const extension = JSON.parse(
+  readFileSync(new URL("../extension.json", import.meta.url), "utf8"),
+);
+
 function fixture() {
   const project = mkdtempSync(join(tmpdir(), "openspec-full-check-"));
   mkdirSync(join(project, "openspec"), { recursive: true });
@@ -85,6 +89,48 @@ test("installs the implementation-ready planning review contract", () => {
   assert.match(scoreTemplate, /评审范围与材料/);
   assert.match(scoreTemplate, /Task\/验证/);
   assert.match(scoreTemplate, /AGENTS\.md 约束注入/);
+});
+
+test("installs full-check skills with the standard OpenSpec runtime contract", () => {
+  const project = fixture();
+  installOrUpdate({
+    project,
+    tools: ["codex"],
+    validate: false,
+  });
+
+  const skillRoot = join(project, ".agents", "skills");
+  const skillNames = [
+    "openspec-full-prd-review",
+    "openspec-full-propose",
+    "openspec-full-score",
+    "openspec-full-apply",
+    "openspec-full-tdd",
+    "openspec-full-archive",
+  ];
+  const skills = Object.fromEntries(
+    skillNames.map((name) => [
+      name,
+      readFileSync(join(skillRoot, name, "SKILL.md"), "utf8"),
+    ]),
+  );
+
+  for (const content of Object.values(skills)) {
+    assert.match(content, /compatibility: Requires OpenSpec or OpenSpec-CN 1\.8\.0 or later\./);
+    assert.match(content, /store list --json/);
+    assert.match(content, /context --json/);
+    assert.match(content, /root/);
+  }
+
+  assert.match(skills["openspec-full-propose"], /resolvedOutputPath/);
+  assert.match(skills["openspec-full-propose"], /artifact 依赖图/);
+  assert.match(skills["openspec-full-apply"], /missingArtifacts/);
+  assert.match(skills["openspec-full-apply"], /state: all_done/);
+  assert.match(skills["openspec-full-tdd"], /contextFiles/);
+  assert.match(skills["openspec-full-archive"], /existingOutputPaths/);
+  assert.match(skills["openspec-full-archive"], /前台同步执行/);
+  assert.match(skills["openspec-full-archive"], /changeRoot/);
+  assert.equal(extension.requirements.openspec, ">=1.8.0");
 });
 
 test("reinstall is idempotent", () => {

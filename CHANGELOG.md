@@ -4,6 +4,8 @@
 
 - Strengthen the planning reviewer with source inventory, bidirectional requirement tracing, semantic AGENTS.md checks, minimal clarification questions, and implementation/acceptance readiness gates.
 - Expand the score workflow and report template so product decisions, project constraints, code facts, tasks, and verification evidence remain traceable.
+- Rebase all six Full-check skills on OpenSpec's root/store and authoritative-path contracts; make Propose, Apply, and Archive behavioral supersets of the standard workflows while retaining PRD, Score, review, TDD, and verified delta-sync gates.
+- Raise the OpenSpec requirement to 1.8.0 because the completed workflows rely on the current `context`, store-aware instructions, action context, and archive guidance contracts.
 
 ## 0.1.0
 
