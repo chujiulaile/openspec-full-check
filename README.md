@@ -135,10 +135,10 @@ $openspec-full-archive <change-name>
 | 阶段入口 | 必须满足 | 未通过时 |
 |---|---|---|
 | propose | 已完成 PRD Review；非 ready 时用户已知情接受风险 | 先澄清，或记录接受的风险 |
-| apply | `score.md` 为 `result: pass` 且分数至少 85 | 修订规划并重新评分 |
+| apply | `score.md` 为 `result: pass`、分数至少 85，且需求来源到验证方式可追踪、无阻塞项 | 修订规划并重新评分 |
 | archive | `tdd-report.md` 为 `status: passed` | 修复测试/实现并重新执行 TDD |
 
-PRD Reviewer、规划 Reviewer 和代码 Reviewer 都是只读角色，只返回结论、问题与证据。主 Agent 负责核验、落盘、修复、运行测试和推进阶段。
+PRD Reviewer、规划 Reviewer 和代码 Reviewer 都是只读角色，只返回结论、问题与证据。规划 Reviewer 会核对用户需求与资料、适用 AGENTS.md、各规划产物和必要代码事实，重点判断产品规则是否足以直接实现和验收。主 Agent 负责核验、落盘、修复、运行测试和推进阶段。
 
 ## 管理命令
 

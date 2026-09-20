@@ -55,6 +55,38 @@ test("installs Codex and Claude adapters without changing the default schema", (
   assert.deepEqual(manifest(project).tools, ["claude", "codex"]);
 });
 
+test("installs the implementation-ready planning review contract", () => {
+  const project = fixture();
+  installOrUpdate({
+    project,
+    tools: ["codex", "claude"],
+    validate: false,
+  });
+
+  const codexReviewer = readFileSync(
+    join(project, ".codex", "agents", "openspec-planning-reviewer.toml"),
+    "utf8",
+  );
+  const claudeReviewer = readFileSync(
+    join(project, ".claude", "agents", "openspec-planning-reviewer.md"),
+    "utf8",
+  );
+  const scoreTemplate = readFileSync(
+    join(project, "openspec", "schemas", "full-check", "templates", "score.md"),
+    "utf8",
+  );
+
+  for (const reviewer of [codexReviewer, claudeReviewer]) {
+    assert.match(reviewer, /来源与追踪/);
+    assert.match(reviewer, /产品可落地检查/);
+    assert.match(reviewer, /AGENTS\.md/);
+    assert.match(reviewer, /用户需要确认的问题/);
+  }
+  assert.match(scoreTemplate, /评审范围与材料/);
+  assert.match(scoreTemplate, /Task\/验证/);
+  assert.match(scoreTemplate, /AGENTS\.md 约束注入/);
+});
+
 test("reinstall is idempotent", () => {
   const project = fixture();
   installOrUpdate({ project, tools: ["codex"], validate: false });

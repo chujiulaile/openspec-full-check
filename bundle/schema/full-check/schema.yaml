@@ -55,12 +55,14 @@ artifacts:
 
   - id: score
     generates: score.md
-    description: 完整规划产物的独立、只读、可追踪质量评分
+    description: 对需求来源与完整规划产物进行独立、只读、可落地的质量评审
     template: score.md
     instruction: |
-      仅通过显式 openspec-full-score 工作流创建。独立核对 prd-review、proposal、specs、
-      design、tasks 和必要代码事实。总分达到 85 且没有 blocker、材料缺口、关键未决事项、
-      不可追踪需求或实现/验收冲突时，result 才能为 pass。
+      仅通过显式 openspec-full-score 工作流创建。独立核对用户需求与资料、适用 AGENTS.md、
+      prd-review、proposal、specs、design、tasks、相关主 specs 和必要代码事实。建立来源到验证
+      方式的 R1..Rn 双向追踪，确认产品规则足以实现和验收。总分达到 85 且没有 blocker、
+      材料缺口、关键未决事项、来源冲突、不可追踪需求、未经授权的新增规则或实现/验收冲突时，
+      result 才能为 pass。
     requires: [tasks]
 
 apply:
