@@ -36,16 +36,14 @@ metadata:
 
 主 Agent 核验 Reviewer 的路径引用、证据、算分和门禁判断后，严格按 template/instruction 写 resolvedOutputPath，并复读文件、重跑 status。用户确认项按主题合并，只保留会改变行为、范围、契约或验收的问题；每项含互斥选项、影响和推荐。
 
-### 评审完成闭环（强制）
+### 委派、等待与闭环（强制）
 
-当本流程已委派独立 Reviewer 时，主 Agent MUST 保持当前回合处于等待状态，直到 Reviewer 返回完成结论；不得在“正在等待评分”后结束回合或要求用户再次提醒。收到完成通知后，主 Agent MUST 在同一连续流程中：
+独立 Reviewer 是本轮的同步门禁，不是可在主会话结束后自行推进的后台任务。委派时必须保存宿主返回的任务/线程句柄，并立即调用宿主提供的**阻塞等待**能力，直到 Reviewer 返回 `completed`、`failed`、`interrupted` 或明确需要用户输入的终态。
 
-1. 读取并核验 Reviewer 的最终结论与证据；
-2. 仅写入或更新 `score` artifact；
-3. 复读 `score` 并重跑 `status`；
-4. 主动向用户报告通过/未通过、分数、关键风险及下一步。
-
-等待超时不是完成条件。若 Reviewer 仍在运行，继续使用有界等待并保持主流程存活；只有 Reviewer 明确失败、被中断或需要用户输入时，才向用户报告该状态。
+- 有界等待超时只表示本次等待窗口结束；Reviewer 仍在运行时，必须立即再次等待。不得把“正在评分”“已启动 Reviewer”或超时当作完成，也不得在有未终态句柄时结束主回合、输出最终答复或要求用户再次提醒。
+- 收到 `completed` 后，主 Agent 必须在同一连续流程中读取并核验 Reviewer 的最终结论与证据，只写入或更新 `score` artifact，复读 `score`、重跑 `status`，然后主动报告通过/未通过、分数、关键风险和下一步。
+- Reviewer `failed`、`interrupted` 或需要用户输入时，保留现有产物并报告该终态；不得编造评分、写入部分 score 或转入 Apply。
+- 宿主若只能 fire-and-forget 地启动子 Agent、不能在当前流程等待或恢复处理结果，则不得用该方式运行 Full-check Score；应改用宿主支持的同步只读 Reviewer 调用，或停止并说明当前宿主不支持该门禁。不得把主 Agent 的自评伪装成独立评分。
 
 未通过时提示修订规划并由用户显式重跑评分；通过时提示 `$openspec-full-apply <change>`。不得同轮修复—复评或启动 apply。
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+- Make independent Score and Apply subagent work synchronous: the coordinator records every handle, blocks for terminal results, and never treats a timeout or start notification as completion.
+- Reject fire-and-forget delegation for Full-check Score and Apply so a completed parent turn cannot strand pending work.
+
 ## 0.1.2
 
 - Make PRD review checks conditional on product elements actually present in the source material, avoiding invented state, permission, migration, or concurrency requirements.

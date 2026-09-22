@@ -1,6 +1,6 @@
 {
   "name": "openspec-full-check",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Install a full-check OpenSpec workflow with PRD review, planning score, risk-based code review, and post-apply TDD gates.",
   "type": "module",
   "bin": {

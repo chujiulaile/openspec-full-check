@@ -236,6 +236,21 @@ test("documents a safe independent-review fallback for shared skills", () => {
   assert.match(applySkill, /不得静默把主 Agent 自评伪装成独立评审/);
 });
 
+test("requires subagent completion before Score or Apply may advance", () => {
+  const project = fixture();
+  installOrUpdate({ project, tools: ["codex"], validate: false });
+  const skillRoot = join(project, ".agents", "skills");
+  const scoreSkill = readFileSync(join(skillRoot, "openspec-full-score", "SKILL.md"), "utf8");
+  const applySkill = readFileSync(join(skillRoot, "openspec-full-apply", "SKILL.md"), "utf8");
+
+  assert.match(scoreSkill, /阻塞等待/);
+  assert.match(scoreSkill, /不得在有未终态句柄时结束主回合/);
+  assert.match(scoreSkill, /fire-and-forget/);
+  assert.match(applySkill, /任务台账/);
+  assert.match(applySkill, /不得结束主回合、输出最终答复、勾选任务、派发下一批或启动 Reviewer/);
+  assert.match(applySkill, /任何委派句柄未终态时，主 Agent 不得结束本轮/);
+});
+
 test("installs every Codex agent with medium reasoning effort", () => {
   const project = fixture();
   installOrUpdate({ project, tools: ["codex"], validate: false });
