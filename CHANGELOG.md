@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.2
+
+- Make PRD review checks conditional on product elements actually present in the source material, avoiding invented state, permission, migration, or concurrency requirements.
+- Require the planning score coordinator to keep waiting for its independent reviewer, persist the score, refresh status, and report the result in one continuous run.
+
 ## 0.1.1
 
 - Strengthen the planning reviewer with source inventory, bidirectional requirement tracing, semantic AGENTS.md checks, minimal clarification questions, and implementation/acceptance readiness gates.

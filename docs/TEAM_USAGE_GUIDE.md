@@ -48,19 +48,19 @@ openspec-cn --version
 在项目根目录执行：
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 install --project . --tools codex,claude
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 install --project . --tools codex,claude
 ```
 
 只使用 Codex：
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 install --project . --tools codex
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 install --project . --tools codex
 ```
 
 只使用 Claude Code：
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 install --project . --tools claude
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 install --project . --tools claude
 ```
 
 安装完成后重启 Codex 或 Claude Code，让工具重新扫描 Skill、Agent 和命令。
@@ -70,13 +70,13 @@ npx --yes github:chujiulaile/openspec-full-check#v0.1.1 install --project . --to
 检查安装状态：
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 doctor --project .
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 doctor --project .
 ```
 
 升级已安装版本：
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 update --project .
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 update --project .
 ```
 
 安装器发现团队成员修改过托管文件时会停止，不会静默覆盖。不要直接使用 `--force`，应先检查冲突内容并确认可以覆盖。
@@ -317,7 +317,7 @@ openspec/changes/add-order-refund/
 确认已安装对应工具 adapter，并重启 Codex 或 Claude Code：
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 doctor --project .
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 doctor --project .
 ```
 
 ### 提示 OpenSpec 版本过低或找不到 CLI
@@ -329,8 +329,8 @@ npx --yes github:chujiulaile/openspec-full-check#v0.1.1 doctor --project .
 确认命令运行在正确的项目根目录，并执行：
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 update --project .
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 doctor --project .
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 update --project .
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 doctor --project .
 ```
 
 使用 standalone store 时，必须确保 `full-check` schema 安装在 CLI 返回的权威 OpenSpec 根目录，并且当前宿主能够发现对应 Skill/Agent。

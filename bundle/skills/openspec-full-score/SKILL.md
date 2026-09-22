@@ -36,6 +36,17 @@ metadata:
 
 主 Agent 核验 Reviewer 的路径引用、证据、算分和门禁判断后，严格按 template/instruction 写 resolvedOutputPath，并复读文件、重跑 status。用户确认项按主题合并，只保留会改变行为、范围、契约或验收的问题；每项含互斥选项、影响和推荐。
 
+### 评审完成闭环（强制）
+
+当本流程已委派独立 Reviewer 时，主 Agent MUST 保持当前回合处于等待状态，直到 Reviewer 返回完成结论；不得在“正在等待评分”后结束回合或要求用户再次提醒。收到完成通知后，主 Agent MUST 在同一连续流程中：
+
+1. 读取并核验 Reviewer 的最终结论与证据；
+2. 仅写入或更新 `score` artifact；
+3. 复读 `score` 并重跑 `status`；
+4. 主动向用户报告通过/未通过、分数、关键风险及下一步。
+
+等待超时不是完成条件。若 Reviewer 仍在运行，继续使用有界等待并保持主流程存活；只有 Reviewer 明确失败、被中断或需要用户输入时，才向用户报告该状态。
+
 未通过时提示修订规划并由用户显式重跑评分；通过时提示 `$openspec-full-apply <change>`。不得同轮修复—复评或启动 apply。
 
 ## 分级

@@ -42,20 +42,20 @@ prd-review → propose → score → apply → tdd → archive
 ### PowerShell
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 `
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 `
   install --project . --tools codex,claude
 ```
 
 PowerShell 的续行符是反引号 `` ` ``，不是 Bash 的反斜杠 `\`。也可以写成一行：
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 install --project . --tools codex,claude
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 install --project . --tools codex,claude
 ```
 
 ### Bash / Zsh
 
 ```bash
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 \
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 \
   install --project . --tools codex,claude
 ```
 
@@ -103,7 +103,7 @@ openspec/FULL_CHECK_WORKFLOW.md
 `--dry-run` 只显示计划，不写入文件：
 
 ```powershell
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 `
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 `
   install --project . --tools codex,claude --dry-run
 ```
 
@@ -150,9 +150,9 @@ Full-check 不用缩减版流程替代 OpenSpec：Propose、Apply、Archive 保�
 ## 管理命令
 
 ```bash
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 update --project .
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 doctor --project .
-npx --yes github:chujiulaile/openspec-full-check#v0.1.1 uninstall --project .
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 update --project .
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 doctor --project .
+npx --yes github:chujiulaile/openspec-full-check#v0.1.2 uninstall --project .
 ```
 
 - `update`：根据安装清单安全更新。
@@ -164,10 +164,10 @@ npx --yes github:chujiulaile/openspec-full-check#v0.1.1 uninstall --project .
 
 ## 从 Release 安装包使用
 
-也可以下载 [v0.1.1 Release](https://github.com/chujiulaile/openspec-full-check/releases/tag/v0.1.1) 中的 `.tgz`：
+也可以下载 [v0.1.2 Release](https://github.com/chujiulaile/openspec-full-check/releases/tag/v0.1.2) 中的 `.tgz`：
 
 ```bash
-npx ./openspec-full-check-0.1.1.tgz install --project . --tools codex,claude
+npx ./openspec-full-check-0.1.2.tgz install --project . --tools codex,claude
 ```
 
 ## 本地开发

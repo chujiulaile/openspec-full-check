@@ -1,7 +1,7 @@
 {
   "name": "openspec-full-check",
   "displayName": "OpenSpec Full Check Workflow",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "PRD review, planning score, risk-based code review, and post-apply TDD gates for complex OpenSpec changes.",
   "schema": {
     "name": "full-check",
